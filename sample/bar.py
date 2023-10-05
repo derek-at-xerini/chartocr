@@ -66,6 +66,10 @@ def kp_detection(db, k_ind, data_aug, debug):
     max_tag_len = 128
 
     # allocating memory
+    print(batch_size, input_size)
+    batch_size=int(batch_size)
+    input_size[0]=int(input_size[0])
+    input_size[1]=int(input_size[1])
     images      = np.zeros((batch_size, 3, input_size[0], input_size[1]), dtype=np.float32)
     tl_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     br_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
