@@ -219,6 +219,7 @@ def try_math(image_path, cls_info):
     max_y = 0
     min_y = 1
     word_infos = ocr_result(image_path)
+    print("word info ", word_infos, "\ncls info: ", cls_info)
     for id in title_list:
         if id in cls_info.keys():
             predicted_box = cls_info[id]
@@ -245,6 +246,7 @@ def try_math(image_path, cls_info):
             word_text = re.sub('[^-+0123456789.]', '',  word_text)
             word_text_num = re.sub('[^0123456789]', '', word_text)
             word_text_pure = re.sub('[^0123456789.]', '', word_text)
+            print("processed text: ", word_text_pure)
             if len(word_text_num) > 0 and word_bbox[2] <= x_board+10:
                 dis2max = math.sqrt(math.pow((word_bbox[0]+word_bbox[2])/2-x_board, 2)+math.pow((word_bbox[1]+word_bbox[3])/2-y_max, 2))
                 dis2min = math.sqrt(math.pow((word_bbox[0] + word_bbox[2]) / 2 - x_board, 2) + math.pow(
@@ -272,7 +274,7 @@ def try_math(image_path, cls_info):
             print(abs(min_y-y_min)/delta_plot_y)
             print("Predict the lower bar")
             min_value = int(min_value + (min_y-y_min)*delta)
-
+    print(title2string, "---title strings")
     return title2string, round(min_value, 2), round(max_value, 2)
 
 

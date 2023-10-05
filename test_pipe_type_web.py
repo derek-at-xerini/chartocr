@@ -176,6 +176,7 @@ def try_math(image_path, cls_info):
     max_y = 0
     min_y = 1
     word_infos = ocr_result(image_path)
+    print("word infos", word_infos)
     for id in title_list:
         if id in cls_info.keys():
             predicted_box = cls_info[id]

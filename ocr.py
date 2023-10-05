@@ -101,6 +101,7 @@ def ocr_result(image_path):
     df_bb['height'] = df_bb['height'].astype(int)
     df_bb['conf'] = df_bb['conf'].astype(int)
     # build bounding box coordinates array
+    print(df_bb)
     df_bb['boundingBox'] = df_bb.apply(lambda row: [row['left'], row['top'], row['left'] + row['width'], row['top'], row['left'] + row['width'], row['top'] + row['height'], row['left'], row['top'] + row['height']], axis=1)
     df_bb = df_bb.drop(columns=['left', 'top', 'width', 'height', 'conf'])
     df_bb = df_bb[['boundingBox', 'text']]

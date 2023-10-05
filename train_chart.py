@@ -19,7 +19,7 @@ from tqdm import tqdm
 from utils import stdout_to_tqdm
 from config import system_configs
 from nnet.py_factory import NetworkFactory
-from azureml.core.run import Run
+# from azureml.core.run import Run
 from torch.multiprocessing import Process, Queue, Pool
 from db.datasets import datasets
 import time
@@ -111,7 +111,7 @@ def train(training_dbs, validation_db, start_iter=0):
     training_pin_thread.start()
 
 
-    run = Run.get_context()
+    #run = Run.get_context()
     if pretrained_model is not None:
         if not os.path.exists(pretrained_model):
             raise ValueError("pretrained model does not exist")
@@ -159,14 +159,14 @@ def train(training_dbs, validation_db, start_iter=0):
 
         if display and iteration % display == 0:
             print("training loss at iteration {}: {}".format(iteration, training_loss.item()))
-            run.log('train_loss', training_loss.item())
+#            run.log('train_loss', training_loss.item())
 
         if val_iter and validation_db.db_inds.size and iteration % val_iter == 0:
             nnet.eval_mode()
             validation, val_ind = sample_data(validation_db, val_ind, data_aug=False)
             validation_loss = nnet.validate(**validation)
             print("validation loss at iteration {}: {}".format(iteration, validation_loss.item()))
-            run.log('val_loss', validation_loss.item())
+#            run.log('val_loss', validation_loss.item())
             nnet.train_mode()
 
         if iteration % snapshot == 0:
