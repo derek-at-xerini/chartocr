@@ -172,6 +172,8 @@ class Config:
 
     @property
     def cache_dir(self):
+        print(self._configs["cache_dir"])
+#        self._configs["cache_dir"]="./cache_dir"
         if not os.path.exists(self._configs["cache_dir"]):
             os.makedirs(self._configs["cache_dir"])
         return self._configs["cache_dir"]
