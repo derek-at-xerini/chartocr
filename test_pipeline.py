@@ -284,6 +284,10 @@ def try_math(image_path, cls_info):
     max_y = 0
     min_y = 1
     word_infos = ocr_result(image_path)
+
+    img = cv2.imread(image_path)
+    img_size = img.shape
+
     word_infos_ = [word_info for word_info in word_infos if word_info["text"].strip() != ""]
     print("word info ", word_infos, "\ncls info: ", cls_info)
     for id in title_list:
@@ -291,8 +295,9 @@ def try_math(image_path, cls_info):
             predicted_box = cls_info[id]
             words = []
             for word_info in word_infos:
-                word_bbox = [word_info["boundingBox"][0], word_info["boundingBox"][1], word_info["boundingBox"][4],
-                             word_info["boundingBox"][5]]
+                bbox = word_info["boundingBox"]
+                bbox = resize_bbox(bbox, img_size)
+                word_bbox = [bbox[0], bbox[1], bbox[4], bbox[5]]
                 if check_intersection(predicted_box, word_bbox) > 0.5:
                     words.append([word_info["text"], word_bbox[0], word_bbox[1]])
             words.sort(key=lambda x: x[1] + 10 * x[2])
@@ -305,7 +310,7 @@ def try_math(image_path, cls_info):
         predicted_box = cls_info[4]
         for word_info in word_infos_:
             bbox = word_info["boundingBox"]
-            # bbox = resize_bbox(bbox, img_size) # TODO May need resize
+            bbox = resize_bbox(bbox, img_size)
             word_bbox = [bbox[0], bbox[1], bbox[4], bbox[5]]
             is_contain = contains(predicted_box, word_bbox)
             if is_contain:
