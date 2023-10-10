@@ -59,9 +59,9 @@ def predict(request):
             raise
         Lock = False
         # response json
-        return HttpResponse(json.dump({'message': 'success', 'data': context}))
+        return HttpResponse(json.dumps({'message': 'success', 'data': context}))
     else:
-        return HttpResponse(json.dump({'message': 'fail'}))
+        return HttpResponse(json.dumps({'message': 'fail'}))
 
 
 def get_group(request):
