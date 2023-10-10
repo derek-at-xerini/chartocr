@@ -39,37 +39,29 @@ def predict(request):
             else:
                 min_value = None
                 max_value = None
+
             plot_area, x_axis_strings, image_painted, data, chart_data = test('static/target.png',
                                                                               min_value_official=min_value,
                                                                               max_value_official=max_value)
 
-            context = {}
             title2string = chart_data[2]
-            if 1 in title2string.keys():
-                context['ValueAxisTitle'] = title2string[1]
-            else:
-                context['ValueAxisTitle'] = "None"
-            if 2 in title2string.keys():
-                context['ChartTitle'] = title2string[2]
-            else:
-                context['ChartTitle'] = "None"
-            if 3 in title2string.keys():
-                context['CategoryAxisTitle'] = title2string[3]
-            else:
-                context['CategoryAxisTitle'] = "None"
-
+            # normalise data
             data = [item for sublist in data for item in sublist]
             data = [round(x, 2) for x in data]
             data = [x * 100 / sum(data) for x in data]
-
-            context = context.update({
-                'Legend': x_axis_strings,
+            context = {
                 'Type': cat2id[chart_data[0]],
+                'ChartTitle': title2string[2],
+                'ValueAxisTitle': title2string[1],
+                'CategoryAxisTitle': title2string[3],
+                'Legend': x_axis_strings,
+                'data': data,
                 # 'PlotArea': plot_area,
                 # 'InnerPlotArea': chart_data[1],
-                'data': data,
                 # 'min2max': '%2f:%2f' % (min_value, max_value),
-            })
+            }
+            # remove None
+            context = {k: v for k, v in context.items() if v is not None}
         except:
             print('We met some errors!')
             Lock = False
