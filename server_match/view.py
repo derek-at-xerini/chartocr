@@ -44,6 +44,7 @@ def predict(request):
                                                                               min_value_official=min_value,
                                                                               max_value_official=max_value)
 
+            print(f"Chart Data: {chart_data}")
             title2string = chart_data[2]
             # normalise data
             data = [item for sublist in data for item in sublist]
