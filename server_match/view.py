@@ -47,15 +47,14 @@ def predict(request):
             title2string = chart_data[2]
             # normalise data
             data = [item for sublist in data for item in sublist]
-            data = [round(x, 2) for x in data]
-            data = [x * 100 / sum(data) for x in data]
+            data = [round(x * 100 / sum(data), 2) for x in data]
             context = {
                 'Type': cat2id[chart_data[0]],
                 'ChartTitle': title2string[2] if 2 in title2string.keys() else None,
                 'ValueAxisTitle': title2string[1] if 1 in title2string.keys() else None,
                 'CategoryAxisTitle': title2string[3] if 3 in title2string.keys() else None,
                 'Legend': x_axis_strings,
-                'data': data,
+                'data': {k: v for k, v in zip(x_axis_strings, data)},
                 # 'PlotArea': plot_area,
                 # 'InnerPlotArea': chart_data[1],
                 # 'min2max': '%2f:%2f' % (min_value, max_value),

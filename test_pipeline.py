@@ -22,6 +22,7 @@ from RuleGroup.LIneMatch import GroupLine
 from RuleGroup.Pie import GroupPie
 import math
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+
 torch.backends.cudnn.benchmark = False
 import requests
 import time
@@ -274,7 +275,7 @@ def show_bbox(classes, text_infos):
 
 
 def try_math(image_path, cls_info):
-    title_list = [1, 2, 3]
+    title_list = [0, 1, 2, 3]
     title2string = {}
     x_axis_strings = []
     y_axis_strings = []
@@ -389,7 +390,7 @@ def test(image_path, debug=False, suffix=None, min_value_official=None, max_valu
                 plot_area = [0, 0, 600, 400]
             image_painted, bar_data = GroupBar(image_painted, tls, brs, plot_area, min_value, max_value)
 
-            return plot_area, x_axis_strings,image_painted, bar_data, chartinfo
+            return plot_area, x_axis_strings, image_painted, bar_data, chartinfo
         if info['data_type'] == 2:
             print("Predicted as PieChart")
             results = methods['Pie'][2](image, methods['Pie'][0], methods['Pie'][1], debug=False)
@@ -398,7 +399,7 @@ def test(image_path, debug=False, suffix=None, min_value_official=None, max_valu
             keys = results[1]
             image_painted, pie_data = GroupPie(image_painted, cens, keys)
             print(f"plot_area, image_painted, pie_data, chartinfo: {plot_area, image_painted, pie_data, chartinfo}")
-            return plot_area, x_axis_strings,image_painted, pie_data, chartinfo
+            return plot_area, x_axis_strings, image_painted, pie_data, chartinfo
         if info['data_type'] == 1:
             print("Predicted as LineChart")
             results = methods['Line'][2](image, methods['Line'][0], methods['Line'][1], debug=False, cuda_id=1)
