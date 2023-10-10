@@ -51,9 +51,9 @@ def predict(request):
             data = [x * 100 / sum(data) for x in data]
             context = {
                 'Type': cat2id[chart_data[0]],
-                'ChartTitle': title2string[2],
-                'ValueAxisTitle': title2string[1],
-                'CategoryAxisTitle': title2string[3],
+                'ChartTitle': title2string[2] if 2 in title2string.keys() else None,
+                'ValueAxisTitle': title2string[1] if 1 in title2string.keys() else None,
+                'CategoryAxisTitle': title2string[3] if 3 in title2string.keys() else None,
                 'Legend': x_axis_strings,
                 'data': data,
                 # 'PlotArea': plot_area,
