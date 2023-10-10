@@ -6,6 +6,8 @@ import pprint
 import argparse
 
 import matplotlib
+import matplotlib.pyplot as plt
+
 matplotlib.use("Agg")
 import cv2
 from tqdm import tqdm
@@ -42,7 +44,9 @@ def parse_args():
     parser.add_argument("--suffix", dest="suffix", default=None, type=str)
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--data_dir", dest="data_dir", default="data/linedata(1028)", type=str)
-    parser.add_argument("--image_dir", dest="image_dir", default="C:/work/linedata(1028)/line/images/test2019/f4b5dac780890c2ca9f43c3fe4cc991a_d3d3LmVwc2lsb24uaW5zZWUuZnIJMTk1LjEwMS4yNTEuMTM2.xls-3-0.png", type=str)
+    parser.add_argument("--image_dir", dest="image_dir",
+                        default="C:/work/linedata(1028)/line/images/test2019/f4b5dac780890c2ca9f43c3fe4cc991a_d3d3LmVwc2lsb24uaW5zZWUuZnIJMTk1LjEwMS4yNTEuMTM2.xls-3-0.png",
+                        type=str)
     args = parser.parse_args()
     return args
 
@@ -193,7 +197,9 @@ def ocr_result(image_path):
     df_bb['height'] = df_bb['height'].astype(int)
     df_bb['conf'] = df_bb['conf'].astype(int)
     # build bounding box coordinates array
-    df_bb['boundingBox'] = df_bb.apply(lambda row: [row['left'], row['top'], row['left'] + row['width'], row['top'], row['left'] + row['width'], row['top'] + row['height'], row['left'], row['top'] + row['height']], axis=1)
+    df_bb['boundingBox'] = df_bb.apply(
+        lambda row: [row['left'], row['top'], row['left'] + row['width'], row['top'], row['left'] + row['width'],
+                     row['top'] + row['height'], row['left'], row['top'] + row['height']], axis=1)
     df_bb = df_bb.drop(columns=['left', 'top', 'width', 'height', 'conf'])
     df_bb = df_bb[['boundingBox', 'text']]
     df_bb = df_bb.to_dict('records')
@@ -211,14 +217,66 @@ def check_intersection(box1, box2):
     else:
         return 0
 
+
+def contains(r1, r2):
+    return (r1[0] < r2[0] < r2[2] < r1[2] and r1[1] < r2[1] < r2[3] < r1[3]) or (
+            r2[0] < r1[0] < r1[2] < r2[2] and r2[1] < r1[1] < r1[3] < r2[3])
+
+
+# function to resize (800,800) sized bbox to fit the image
+def resize_bbox(bbox, img_shape):
+    size = (800, 800)
+
+    # get the ratio of the size, y-ratio and x-ratio
+    y_ratio = size[0] / img_shape[0]
+    x_ratio = size[1] / img_shape[1]
+
+    # resize the bbox
+    new_bbox = []
+    for i in range(len(bbox)):
+        if i % 2 == 0:
+            new_bbox.append(bbox[i] / x_ratio)
+        else:
+            new_bbox.append(bbox[i] / y_ratio)
+    return new_bbox
+
+
+# show bounding area of bbox from ./image.jpg, resize the bbox, key is the class
+def show_bbox(classes, text_infos):
+    import cv2
+    img = cv2.imread('./image.jpg')
+    for key in classes:
+        boundingBox = [int(i) for i in classes[key]]
+        cv2.rectangle(img, (int(boundingBox[0]), int(boundingBox[1])), (int(boundingBox[2]), int(boundingBox[3])),
+                      (0, 0, 255), 2)
+        cv2.putText(img, str(key), (int(boundingBox[0]), int(boundingBox[1])), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (0, 0, 255), 2)
+
+    for bbox in text_infos:
+        boundingBox = bbox['boundingBox']
+        boundingBox = resize_bbox(boundingBox, img.shape)
+        print(boundingBox, bbox['text'])
+        cv2.rectangle(img, (int(boundingBox[0]), int(boundingBox[1])), (int(boundingBox[4]), int(boundingBox[5])),
+                      (255, 0, 0), 2)
+        cv2.putText(img, str(bbox['text']), (int(boundingBox[0]), int(boundingBox[1])), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (255, 0, 0), 2)
+
+    plt.imshow(img)
+    plt.show()
+
+
 def try_math(image_path, cls_info):
     title_list = [1, 2, 3]
     title2string = {}
+    x_axis_strings = []
+    y_axis_strings = []
+
     max_value = 1
     min_value = 0
     max_y = 0
     min_y = 1
     word_infos = ocr_result(image_path)
+    word_infos_ = [word_info for word_info in word_infos if word_info["text"].strip() != ""]
     print("word info ", word_infos, "\ncls info: ", cls_info)
     for id in title_list:
         if id in cls_info.keys():
@@ -233,6 +291,17 @@ def try_math(image_path, cls_info):
             for word in words:
                 word_string = word_string + word[0] + ' '
             title2string[id] = word_string
+            # get the x-axis text
+    if 4 in cls_info.keys():
+        predicted_box = cls_info[4]
+        for word_info in word_infos_:
+            bbox = word_info["boundingBox"]
+            # bbox = resize_bbox(bbox, img_size) # TODO May need resize
+            word_bbox = [bbox[0], bbox[1], bbox[4], bbox[5]]
+            is_contain = contains(predicted_box, word_bbox)
+            if is_contain:
+                x_axis_strings.append(word_info["text"])
+
     if 5 in cls_info.keys():
         plot_area = cls_info[5]
         y_max = plot_area[1]

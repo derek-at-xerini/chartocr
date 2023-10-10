@@ -6,6 +6,61 @@ import torch.cuda
 from PIL import Image
 cat2id = {0:'Bar', 1:'Line', 2:'Pie'}
 Lock = False
+
+
+def ping(request):
+    return HttpResponse("pong")
+
+
+def predict(request):
+    if request.method == 'POST':
+        print("Clean Cuda Cache")
+        torch.cuda.empty_cache()
+        Lock = True
+        try:
+            if 'file' in request.FILES.keys():
+                with open('static/target.png', 'wb') as fout:
+                    for chunk in request.FILES['file'].chunks():
+                        fout.write(chunk)
+            if len(request.POST['min']) > 0:
+                min_value = float(request.POST['min'])
+                max_value = float(request.POST['max'])
+            else:
+                min_value = None
+                max_value = None
+            plot_area, legend, image_painted, data, chart_data = test('static/target.png', min_value_official=min_value,
+                                                                      max_value_official=max_value)
+            context = {}
+            title2string = chart_data[2]
+            if 1 in title2string.keys():
+                context['ValueAxisTitle'] = title2string[1]
+            else:
+                context['ValueAxisTitle'] = "None"
+            if 2 in title2string.keys():
+                context['ChartTitle'] = title2string[2]
+            else:
+                context['ChartTitle'] = "None"
+            if 3 in title2string.keys():
+                context['CategoryAxisTitle'] = title2string[3]
+            else:
+                context['CategoryAxisTitle'] = "None"
+            context['Type'] = cat2id[chart_data[0]]
+            context['Legend'] = legend
+            context['PlotArea'] = plot_area
+            context['InnerPlotArea'] = chart_data[1]
+            context['image_painted'] = image_painted
+            context['data'] = data
+            context['min2max'] = '%2f:%2f' % (min_value, max_value)
+        except:
+            print('We met some errors!')
+            Lock = False
+            raise
+        Lock = False
+        return HttpResponse({'message': 'success', 'data': context})
+    else:
+        return HttpResponse({'message': 'fail'})
+
+
 def get_group(request):
     global Lock
     print("The method is: %s" %request.method)
