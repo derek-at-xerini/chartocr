@@ -50,10 +50,13 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
 def make_dirs(directories):
     for directory in directories:
         if not os.path.exists(directory):
             os.makedirs(directory)
+
+
 def load_net(testiter, cfg_name, data_dir, cache_dir, result_dir, cuda_id=0):
     cfg_file = os.path.join(system_configs.config_dir, cfg_name + ".json")
     with open(cfg_file, "r") as f:
@@ -93,6 +96,7 @@ def load_net(testiter, cfg_name, data_dir, cache_dir, result_dir, cuda_id=0):
     nnet.eval_mode()
     return db, nnet
 
+
 def Pre_load_nets():
     methods = {}
     db_cls, nnet_cls = load_net(50000, "CornerNetCls", "data/clsdata(1031)", "data/clsdata(1031)/cache",
@@ -124,7 +128,10 @@ def Pre_load_nets():
     testing_line_cls = importlib.import_module(path).testing
     methods['LineCls'] = [db_line_cls, nnet_line_cls, testing_line_cls]
     return methods
+
+
 methods = Pre_load_nets()
+
 
 def ocr_result_old(image_path):
     cv_subscription_key = "xxx"
@@ -159,7 +166,6 @@ def ocr_result_old(image_path):
         analysis = json.loads(binary_content.decode('ascii'))
         print(analysis)
 
-
     line_infos = [region["lines"] for region in analysis["recognitionResults"]]
     word_infos = []
     for line in line_infos:
@@ -172,6 +178,7 @@ def ocr_result_old(image_path):
                     continue
                 word_infos.append(word_info)
     return word_infos
+
 
 def ocr_result(image_path):
     image = Image.open(image_path)
@@ -205,6 +212,7 @@ def ocr_result(image_path):
     df_bb = df_bb.to_dict('records')
     return df_bb
 
+
 def check_intersection(box1, box2):
     if (box1[2] - box1[0]) + ((box2[2] - box2[0])) > max(box2[2], box1[2]) - min(box2[0], box1[0]) \
             and (box1[3] - box1[1]) + ((box2[3] - box2[1])) > max(box2[3], box1[3]) - min(box2[1], box1[1]):
@@ -212,8 +220,8 @@ def check_intersection(box1, box2):
         Yc1 = max(box1[1], box2[1])
         Xc2 = min(box1[2], box2[2])
         Yc2 = min(box1[3], box2[3])
-        intersection_area = (Xc2-Xc1)*(Yc2-Yc1)
-        return intersection_area/((box2[3]-box2[1])*(box2[2]-box2[0]))
+        intersection_area = (Xc2 - Xc1) * (Yc2 - Yc1)
+        return intersection_area / ((box2[3] - box2[1]) * (box2[2] - box2[0]))
     else:
         return 0
 
@@ -283,10 +291,11 @@ def try_math(image_path, cls_info):
             predicted_box = cls_info[id]
             words = []
             for word_info in word_infos:
-                word_bbox = [word_info["boundingBox"][0], word_info["boundingBox"][1], word_info["boundingBox"][4], word_info["boundingBox"][5]]
+                word_bbox = [word_info["boundingBox"][0], word_info["boundingBox"][1], word_info["boundingBox"][4],
+                             word_info["boundingBox"][5]]
                 if check_intersection(predicted_box, word_bbox) > 0.5:
                     words.append([word_info["text"], word_bbox[0], word_bbox[1]])
-            words.sort(key=lambda x: x[1]+10*x[2])
+            words.sort(key=lambda x: x[1] + 10 * x[2])
             word_string = ""
             for word in words:
                 word_string = word_string + word[0] + ' '
@@ -310,17 +319,19 @@ def try_math(image_path, cls_info):
         dis_max = 10000000000000000
         dis_min = 10000000000000000
         for word_info in word_infos:
-            word_bbox = [word_info["boundingBox"][0], word_info["boundingBox"][1], word_info["boundingBox"][4], word_info["boundingBox"][5]]
+            word_bbox = [word_info["boundingBox"][0], word_info["boundingBox"][1], word_info["boundingBox"][4],
+                         word_info["boundingBox"][5]]
             word_text = word_info["text"]
-            word_text = re.sub('[^-+0123456789.]', '',  word_text)
+            word_text = re.sub('[^-+0123456789.]', '', word_text)
             word_text_num = re.sub('[^0123456789]', '', word_text)
             word_text_pure = re.sub('[^0123456789.]', '', word_text)
             print("processed text: ", word_text_pure)
-            if len(word_text_num) > 0 and word_bbox[2] <= x_board+10:
-                dis2max = math.sqrt(math.pow((word_bbox[0]+word_bbox[2])/2-x_board, 2)+math.pow((word_bbox[1]+word_bbox[3])/2-y_max, 2))
+            if len(word_text_num) > 0 and word_bbox[2] <= x_board + 10:
+                dis2max = math.sqrt(math.pow((word_bbox[0] + word_bbox[2]) / 2 - x_board, 2) + math.pow(
+                    (word_bbox[1] + word_bbox[3]) / 2 - y_max, 2))
                 dis2min = math.sqrt(math.pow((word_bbox[0] + word_bbox[2]) / 2 - x_board, 2) + math.pow(
                     (word_bbox[1] + word_bbox[3]) / 2 - y_min, 2))
-                y_mid = (word_bbox[1]+word_bbox[3])/2
+                y_mid = (word_bbox[1] + word_bbox[3]) / 2
                 if dis2max <= dis_max:
                     dis_max = dis2max
                     max_y = y_mid
@@ -335,16 +346,16 @@ def try_math(image_path, cls_info):
                         min_value = -min_value
         print(min_value)
         print(max_value)
-        delta_min_max = max_value-min_value
+        delta_min_max = max_value - min_value
         delta_mark = min_y - max_y
         delta_plot_y = y_min - y_max
-        delta = delta_min_max/delta_mark
-        if abs(min_y-y_min)/delta_plot_y > 0.1:
-            print(abs(min_y-y_min)/delta_plot_y)
+        delta = delta_min_max / delta_mark
+        if abs(min_y - y_min) / delta_plot_y > 0.1:
+            print(abs(min_y - y_min) / delta_plot_y)
             print("Predict the lower bar")
-            min_value = int(min_value + (min_y-y_min)*delta)
+            min_value = int(min_value + (min_y - y_min) * delta)
     print(title2string, "---title strings")
-    return title2string, round(min_value, 2), round(max_value, 2)
+    return title2string, x_axis_strings, round(min_value, 2), round(max_value, 2)
 
 
 def test(image_path, debug=False, suffix=None, min_value_official=None, max_value_official=None):
@@ -357,7 +368,7 @@ def test(image_path, debug=False, suffix=None, min_value_official=None, max_valu
         brs = results[2]
         plot_area = []
         image_painted, cls_info = GroupCls(image_cls, tls, brs)
-        title2string, min_value, max_value = try_math(image_path, cls_info)
+        title2string, x_axis_strings, min_value, max_value = try_math(image_path, cls_info)
         if min_value_official is not None:
             min_value = min_value_official
             max_value = max_value_official
@@ -391,13 +402,12 @@ def test(image_path, debug=False, suffix=None, min_value_official=None, max_valu
             else:
                 plot_area = [0, 0, 600, 400]
             print(min_value, max_value)
-            image_painted, quiry, keys, hybrids = GroupQuiry(image_painted, keys, hybrids, plot_area, min_value, max_value)
-            results = methods['LineCls'][2](image, methods['LineCls'][0], quiry, methods['LineCls'][1], debug=False, cuda_id=1)
+            image_painted, quiry, keys, hybrids = GroupQuiry(image_painted, keys, hybrids, plot_area, min_value,
+                                                             max_value)
+            results = methods['LineCls'][2](image, methods['LineCls'][0], quiry, methods['LineCls'][1], debug=False,
+                                            cuda_id=1)
             line_data = GroupLine(image_painted, keys, hybrids, plot_area, results, min_value, max_value)
-            return plot_area, image_painted, line_data, chartinfo
-
-
-
+            return plot_area, x_axis_strings, image_painted, line_data, chartinfo
 
 
 if __name__ == "__main__":
@@ -405,6 +415,7 @@ if __name__ == "__main__":
     tar_path = 'C:/work/clsdata(1031)/cls/images/test2019'
     images = os.listdir(tar_path)
     from random import shuffle
+
     shuffle(images)
     for image in tqdm(images):
         path = os.path.join(tar_path, image)

@@ -17,6 +17,6 @@ from django.urls import re_path
 from . import view
 urlpatterns = [
     re_path(r'^$', view.get_group),
-    re_path(r'^ping/$', view.ping),
-    re_path(r'^predict/$', view.predict),
+    re_path(r'^ping$', view.ping),
+    re_path(r'^predict$', view.predict),
 ]

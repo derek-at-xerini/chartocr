@@ -28,7 +28,7 @@ def predict(request):
             else:
                 min_value = None
                 max_value = None
-            plot_area, legend, image_painted, data, chart_data = test('static/target.png', min_value_official=min_value,
+            plot_area, x_axis_strings, image_painted, data, chart_data = test('static/target.png', min_value_official=min_value,
                                                                       max_value_official=max_value)
             context = {}
             title2string = chart_data[2]
@@ -45,7 +45,7 @@ def predict(request):
             else:
                 context['CategoryAxisTitle'] = "None"
             context['Type'] = cat2id[chart_data[0]]
-            context['Legend'] = legend
+            context['Legend'] = x_axis_strings
             context['PlotArea'] = plot_area
             context['InnerPlotArea'] = chart_data[1]
             context['image_painted'] = image_painted
