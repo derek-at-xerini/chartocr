@@ -98,7 +98,7 @@ def predict(request):
 
             context = {
                 # 'print_data': print_data,
-                'Legend': title2string[4],
+                'Legend': x_axis_strings,
                 'Type': cat2id[chart_data[0]],
                 'PlotArea': plot_area,
                 'InnerPlotArea': chart_data[1],
