@@ -62,14 +62,14 @@ def predict(request):
             data = [round(x, 2) for x in data]
             data = [x * 100 / sum(data) for x in data]
 
-            context = {
+            context = context.update({
                 'Legend': x_axis_strings,
                 'Type': cat2id[chart_data[0]],
                 # 'PlotArea': plot_area,
                 # 'InnerPlotArea': chart_data[1],
                 'data': data,
-                'min2max': '%2f:%2f' % (min_value, max_value),
-            }
+                # 'min2max': '%2f:%2f' % (min_value, max_value),
+            })
         except:
             print('We met some errors!')
             Lock = False
