@@ -1,3 +1,5 @@
+import json
+
 from django.http import HttpResponse
 from test_pipeline import test
 from django.shortcuts import render
@@ -56,9 +58,10 @@ def predict(request):
             Lock = False
             raise
         Lock = False
-        return HttpResponse({'message': 'success', 'data': context})
+        # response json
+        return HttpResponse(json.dump({'message': 'success', 'data': context}))
     else:
-        return HttpResponse({'message': 'fail'})
+        return HttpResponse(json.dump({'message': 'fail'}))
 
 
 def get_group(request):
