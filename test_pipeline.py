@@ -377,9 +377,11 @@ def test(image_path, debug=False, suffix=None, min_value_official=None, max_valu
         if info['data_type'] == 2:
             print("Predicted as PieChart")
             results = methods['Pie'][2](image, methods['Pie'][0], methods['Pie'][1], debug=False)
+            print(results)
             cens = results[0]
             keys = results[1]
             image_painted, pie_data = GroupPie(image_painted, cens, keys)
+            print(f"plot_area, image_painted, pie_data, chartinfo: {plot_area, image_painted, pie_data, chartinfo}")
             return plot_area, image_painted, pie_data, chartinfo
         if info['data_type'] == 1:
             print("Predicted as LineChart")
