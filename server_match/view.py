@@ -50,7 +50,7 @@ def predict(request):
             context['Legend'] = x_axis_strings
             context['PlotArea'] = plot_area
             context['InnerPlotArea'] = chart_data[1]
-            context['image_painted'] = image_painted
+            # context['image_painted'] = image_painted
             context['data'] = data
             context['min2max'] = '%2f:%2f' % (min_value, max_value)
         except:
