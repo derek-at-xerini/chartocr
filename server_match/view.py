@@ -32,6 +32,46 @@ def predict(request):
                 max_value = None
             plot_area, x_axis_strings, image_painted, data, chart_data = test('static/target.png', min_value_official=min_value,
                                                                       max_value_official=max_value)
+            print_data = []
+            if chart_data[0]==0:
+                if len(request.POST['min']) > 0:
+                    min_value = float(request.POST['min'])
+                    max_value = float(request.POST['max'])
+                else:
+                    min_value = chart_data[3]
+                    max_value = chart_data[4]
+                for k in range(len(data)):
+                    for j in range(len(data[k])):
+                        data[k][j] = round((max_value - min_value) * data[k][j] + min_value, 2)
+                        # print_data += ('%8.2f' % (data[k][j]))
+                        # print_data += ' '
+                        print_data.append(data[k][j])
+                    # print_data += '\n'
+            if chart_data[0] == 1:
+                if len(request.POST['min']) > 0:
+                    min_value = float(request.POST['min'])
+                    max_value = float(request.POST['max'])
+                else:
+                    min_value = chart_data[3]
+                    max_value = chart_data[4]
+                for k in range(len(data)):
+                    for j in range(len(data[k])):
+                        data[k][j] = round((max_value - min_value) * data[k][j] + min_value, 2)
+                        # print_data += ('%8.2f' % (data[k][j]))
+                        # print_data += ' '
+                        print_data.append(data[k][j])
+                    # print_data += '\n'
+            if chart_data[0]==2:
+                for k in range(len(data)):
+                    data[k] /= 360
+                data = [round(x, 2) for x in data]
+                for k in range(len(data)):
+                    # print_data += ('%8.2f' % (data[k]))
+                    # print_data += ' '
+                    print_data.append(data[k])
+                min_value = 0
+                max_value = 1
+
             context = {}
             title2string = chart_data[2]
             if 1 in title2string.keys():
@@ -46,13 +86,25 @@ def predict(request):
                 context['CategoryAxisTitle'] = title2string[3]
             else:
                 context['CategoryAxisTitle'] = "None"
-            context['Type'] = cat2id[chart_data[0]]
-            context['Legend'] = x_axis_strings
-            context['PlotArea'] = plot_area
-            context['InnerPlotArea'] = chart_data[1]
-            # context['image_painted'] = image_painted
-            context['data'] = data
-            context['min2max'] = '%2f:%2f' % (min_value, max_value)
+            # if 4 in title2string.keys():
+            #     context['Legend'] = title2string[4]
+            # else:
+            #     context['Legend'] = "None"
+            #
+            # flatten and normalize the data to percentage
+            data = [item for sublist in data for item in sublist]
+            data = [round(x, 2) for x in data]
+            data = [x / sum(data) for x in data]
+
+            context = {
+                # 'print_data': print_data,
+                'Legend': title2string[4],
+                'Type': cat2id[chart_data[0]],
+                'PlotArea': plot_area,
+                'InnerPlotArea': chart_data[1],
+                'data': data,
+                'min2max': '%2f:%2f' % (min_value, max_value),
+            }
         except:
             print('We met some errors!')
             Lock = False
