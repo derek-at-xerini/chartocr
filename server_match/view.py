@@ -14,12 +14,13 @@ type2idFormal = {
     "ChartTitle": 2,
     "CategoryAxisTitle": 3,
     "PlotArea": 4,
-    "InnerPlotArea": 5}
+    "InnerPlotArea": 5
+}
 
 Lock = False
 
 
-def ping(request):
+def ping():
     return HttpResponse("pong")
 
 
@@ -95,8 +96,8 @@ def get_group(request):
                 else:
                     min_value = None
                     max_value = None
-                plot_area, image_painted, data, chart_data = test('static/target.png', min_value_official=min_value,
-                                                                  max_value_official=max_value)
+                plot_area, _, image_painted, data, chart_data = test('static/target.png', min_value_official=min_value,
+                                                                     max_value_official=max_value)
                 print_data = ''
                 if chart_data[0] == 0:
                     if len(request.POST['min']) > 0:
